@@ -12,6 +12,9 @@ raw_groups = os.environ.get("ALLOWED_GROUPS", "")
 
 ALLOWED_GROUPS = [int(g_id.strip()) for g_id in raw_groups.split(",") if g_id.strip()]
 
+print(f"Kuzatilayotgan guruhlar ro'yxati: {ALLOWED_GROUPS}")
+
+
 API_ID = int(os.environ.get("API_ID")) # Telegram API ID
 API_HASH = os.environ.get("API_HASH")  # Telegram API Hash
 
@@ -28,13 +31,20 @@ async def catch_and_save_messages(client, message):
     if group_id not in ALLOWED_GROUPS:
         return
 
-    user_id = message.from_user.id if message.from_user else None
-    username = message.from_user.username if message.from_user else "Yashirin_Foydalanuvchi"
-    group_name = message.chat.title
-    text = message.text or "[Media xabar yoki fayl]"
+    if message.from_user:
+        user_id = message.from_user.id
+        username = message.from_user.username or f"User_{user_id}"
+    elif message.sender_chat:  # Agar xabar kanal nomidan kelgan bo'lsa (Linked Chat)
+        user_id = message.sender_chat.id
+        username = message.sender_chat.title or "Kanal_E'loni"
+    else:
+        user_id = 0
+        username = "Noma'lum_Yuboruvchi"
 
-    if not user_id:
-        return
+    group_name = message.chat.title
+
+    text = message.text or message.caption or "[Media / Rasm / Fayl]"
+
 
     # 2. ASINXRON ma'lumotlar bazasiga (PostgreSQL) saqlash
     async with AsyncSessionLocal() as session:
@@ -48,11 +58,11 @@ async def catch_and_save_messages(client, message):
             )
             session.add(new_msg)
             await session.commit()
-            print(f"✅ Saqlandi: [{group_name}] -> @{username}: {text[:30]}...")
+            print(f"✅ Saqlandi: [{group_name}] -> {username}: {text[:30]}...")
         except Exception as e:
             await session.rollback()
             print(f"❌ Postgres'ga yozishda xatolik: {e}")
-            return  # Agar bazaga yozishda xato bo'lsa, lichkaga yozib o'tirmaydi
+            return
 
 # --- ISHGA TUSHIRISH LOGIKASI ---
 

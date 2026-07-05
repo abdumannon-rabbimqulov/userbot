@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import declarative_base, Mapped, mapped_column
-from sqlalchemy import Text, String
+from sqlalchemy import Text, String,BigInteger
 
 load_dotenv()
 
@@ -22,9 +22,9 @@ class GroupMessage(Base):
     __tablename__ = "group_messages"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    user_id: Mapped[int] = mapped_column(nullable=False)
+    user_id: Mapped[int] = mapped_column(BigInteger,nullable=False)
     username: Mapped[str] = mapped_column(String(100), nullable=True)
-    group_id: Mapped[int] = mapped_column(nullable=False)
+    group_id: Mapped[int] = mapped_column(BigInteger,nullable=False)
     group_name: Mapped[str] = mapped_column(String(255), nullable=True)
     message_text: Mapped[str] = mapped_column(Text, nullable=True)
 

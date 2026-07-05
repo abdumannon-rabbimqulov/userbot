@@ -1,2 +1,4 @@
 .venv
 .env
+my_account.session
+my_account.session-journal

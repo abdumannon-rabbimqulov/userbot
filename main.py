@@ -20,7 +20,7 @@ API_HASH = os.environ.get("API_HASH")  # Telegram API Hash
 app = Client("my_account", api_id=API_ID, api_hash=API_HASH)
 
 
-@app.on_message(filters.group & ~filters.bot)
+@app.on_message(filters.group)
 async def catch_and_save_messages(client, message):
     group_id = message.chat.id
 
@@ -53,20 +53,6 @@ async def catch_and_save_messages(client, message):
             await session.rollback()
             print(f"❌ Postgres'ga yozishda xatolik: {e}")
             return  # Agar bazaga yozishda xato bo'lsa, lichkaga yozib o'tirmaydi
-
-    # 3. Spam filtr uchun 4 soniya kechikish (Akkaunt bloklanmasligi uchun)
-    await asyncio.sleep(4)
-
-    # 4. Foydalanuvchining shaxsiy xabarnomasiga (lichkasiga) yozish
-    try:
-        await client.send_message(
-            chat_id=user_id,
-            text=f"Salom @{username}! Sizning guruhga yuborgan xabaringiz qabul qilindi va tizimga saqlandi."
-        )
-        print(f"✉️ Lichkaga xabar yuborildi: @{username}")
-    except Exception as e:
-        print(f"⚠️ Lichkaga yozishda xatolik (@{username} sizni bloklagan yoki lichkasi yopiq bo'lishi mumkin): {e}")
-
 
 # --- ISHGA TUSHIRISH LOGIKASI ---
 
